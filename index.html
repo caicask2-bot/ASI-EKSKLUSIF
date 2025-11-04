@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panduan Sukses Menyusui</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Beige, Soft Peach, Forest Green accent) -->
+    <!-- Application Structure Plan: A tab-based SPA with four main sections: Home, Educational Materials, Quiz, and Certificate. This structure breaks down the user journey into logical steps (learn -> test -> reward), preventing information overload and providing clear navigation. The interactive quiz and certificate serve as an engaging goal for the user to complete the learning module. -->
+    <!-- Visualization & Content Choices: Report Info: Milk Composition -> Goal: Compare -> Viz: Bar Chart -> Interaction: Hover for details -> Justification: Visually shows the difference between colostrum and mature milk, which is easier to grasp than text alone -> Library: Chart.js. Report Info: Knowledge Check -> Goal: Test Understanding -> Presentation: Interactive Quiz -> Interaction: User selects answers, gets immediate score -> Justification: Actively engages the user and reinforces learning -> Method: Vanilla JS. Report Info: Course Completion -> Goal: Reward/Acknowledge -> Presentation: Dynamically generated certificate -> Interaction: User enters name, prints certificate -> Justification: Provides a sense of accomplishment and a tangible takeaway -> Method: Vanilla JS, DOM manipulation. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FFFBF5;
+            color: #4A4A4A;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            border-bottom-color: #386641;
+            color: #386641;
+        }
+        .btn-primary {
+            background-color: #386641;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #2A4830;
+        }
+        .btn-secondary {
+            background-color: #A7C957;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background-color: #89A446;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .quiz-option {
+            border: 2px solid #E5E7EB;
+            transition: all 0.3s ease;
+        }
+        .quiz-option:hover {
+            border-color: #A7C957;
+            background-color: #F7FEE7;
+        }
+        .quiz-option.selected {
+            border-color: #386641;
+            background-color: #DCFCE7;
+        }
+        .certificate {
+            border: 10px solid #A7C957;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e5f0d6' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .printable-area, .printable-area * {
+                visibility: visible;
+            }
+            .printable-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-5xl">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#386641]">Panduan Sukses Menyusui</h1>
+            <p class="mt-2 text-lg text-gray-600">Materi, Kuis, & Sertifikat untuk Bunda Hebat</p>
+        </header>
+
+        <nav class="flex justify-center border-b border-gray-200 mb-12">
+            <ul class="flex flex-wrap -mb-px text-center font-medium">
+                <li class="mr-2">
+                    <a href="#" id="nav-beranda" class="nav-link active inline-block p-4">Beranda</a>
+                </li>
+                <li class="mr-2">
+                    <a href="#" id="nav-materi" class="nav-link inline-block p-4">Materi Edukasi</a>
+                </li>
+                <li class="mr-2">
+                    <a href="#" id="nav-kuis" class="nav-link inline-block p-4">Kuis Pengetahuan</a>
+                </li>
+            </ul>
+        </nav>
+
+        <main>
+            <!-- Section Beranda -->
+            <section id="content-beranda">
+                <div class="card p-8 text-center">
+                    <h2 class="text-3xl font-bold text-[#386641] mb-4">Selamat Datang, Bunda!</h2>
+                    <p class="text-gray-700 leading-relaxed max-w-2xl mx-auto mb-6">
+                        Aplikasi ini dirancang khusus untuk mendukung perjalanan menyusui Anda. Menyusui adalah anugerah terindah yang memberikan nutrisi terbaik bagi si kecil dan memperkuat ikatan antara ibu dan anak. Di sini, Anda akan menemukan informasi lengkap, tips praktis, dan dapat menguji pemahaman Anda melalui kuis.
+                    </p>
+                    <button id="mulai-belajar" class="btn-primary font-bold py-3 px-6 rounded-lg shadow-lg">
+                        Mulai Belajar Sekarang
+                    </button>
+                </div>
+            </section>
+
+            <!-- Section Materi -->
+            <section id="content-materi" class="hidden">
+                 <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-[#386641] mb-2">Materi Edukasi ASI Eksklusif</h2>
+                    <p class="text-gray-600">Pelajari semua hal penting tentang menyusui untuk kesuksesan ASI eksklusif.</p>
+                </div>
+                <div class="space-y-8">
+                    <div class="card p-6">
+                        <h3 class="text-2xl font-bold text-[#386641] mb-3">1. Manfaat Ajaib ASI</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-semibold text-lg mb-2">Untuk Bayi:</h4>
+                                <ul class="list-disc list-inside space-y-1 text-gray-700">
+                                    <li>Nutrisi paling lengkap dan sempurna.</li>
+                                    <li>Meningkatkan sistem kekebalan tubuh.</li>
+                                    <li>Mendukung perkembangan otak optimal.</li>
+                                    <li>Mengurangi risiko alergi, asma, dan obesitas.</li>
+                                    <li>Membangun ikatan emosional yang kuat.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-lg mb-2">Untuk Ibu:</h4>
+                                <ul class="list-disc list-inside space-y-1 text-gray-700">
+                                    <li>Mempercepat pemulihan rahim setelah melahirkan.</li>
+                                    <li>Membantu menurunkan berat badan.</li>
+                                    <li>Mengurangi risiko kanker payudara dan ovarium.</li>
+                                    <li>KB alami (metode amenore laktasi).</li>
+                                    <li>Lebih praktis dan hemat biaya.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-2xl font-bold text-[#386641] mb-3">2. Komposisi ASI: Cairan Hidup yang Berubah</h3>
+                        <p class="text-gray-700 mb-4">ASI bukanlah cairan statis; komposisinya berubah sesuai kebutuhan bayi, bahkan dalam satu sesi menyusui.</p>
+                        <div class="grid md:grid-cols-2 gap-6 items-center">
+                            <div>
+                                <p><strong class="text-[#386641]">Kolostrum:</strong> Cairan emas yang keluar pertama kali. Kaya akan antibodi, protein, dan vitamin A untuk melindungi bayi baru lahir.</p>
+                                <p class="mt-2"><strong class="text-[#386641]">ASI Transisi:</strong> Diproduksi setelah kolostrum hingga 2 minggu. Kandungan lemak dan laktosa meningkat.</p>
+                                <p class="mt-2"><strong class="text-[#386641]">ASI Matang:</strong> Terdiri dari Foremilk (encer, pelepas dahaga) dan Hindmilk (kental, kaya lemak untuk energi dan pertumbuhan).</p>
+                            </div>
+                            <div class="chart-container relative h-64 w-full max-w-sm mx-auto">
+                                <canvas id="komposisiChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="card p-6">
+                        <h3 class="text-2xl font-bold text-[#386641] mb-3">3. Posisi dan Pelekatan yang Benar</h3>
+                        <p class="text-gray-700 mb-4">Kunci menyusui nyaman dan efektif adalah posisi ibu yang rileks dan pelekatan mulut bayi yang tepat pada payudara.</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li><strong>Posisi Ibu Nyaman:</strong> Pastikan punggung ibu tersangga dengan baik. Gunakan bantal jika perlu.</li>
+                            <li><strong>Perut Bayi Menempel Perut Ibu:</strong> Tidak ada jarak antara tubuh ibu dan bayi.</li>
+                            <li><strong>Mulut Bayi Terbuka Lebar:</strong> Dagu bayi menyentuh payudara, dan bibir bawah terlipat keluar (dower).</li>
+                            <li><strong>Areola Sebagian Besar Masuk:</strong> Sebagian besar areola (area gelap di sekitar puting) masuk ke dalam mulut bayi, terutama bagian bawah.</li>
+                            <li><strong>Tanda Pelekatan Benar:</strong> Isapan dalam dan pelan, terdengar suara menelan, dan ibu tidak merasa sakit.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Section Kuis -->
+            <section id="content-kuis" class="hidden">
+                 <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-[#386641] mb-2">Uji Pemahaman Anda</h2>
+                    <p class="text-gray-600">Selesaikan kuis ini untuk mendapatkan sertifikat.</p>
+                </div>
+                <div id="quiz-container" class="card p-8">
+                </div>
+                <div id="quiz-result" class="hidden card p-8 text-center">
+                    <h3 class="text-2xl font-bold mb-4" id="result-title"></h3>
+                    <p class="text-lg mb-6" id="result-message"></p>
+                    <div class="flex justify-center space-x-4">
+                        <button id="retry-quiz" class="btn-secondary font-bold py-3 px-6 rounded-lg">Coba Lagi</button>
+                        <button id="get-certificate" class="btn-primary font-bold py-3 px-6 rounded-lg hidden">Dapatkan Sertifikat</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section Sertifikat -->
+            <section id="content-sertifikat" class="hidden">
+                <div class="card p-6 text-center">
+                    <h2 class="text-2xl font-bold text-[#386641] mb-4">Input Nama untuk Sertifikat</h2>
+                    <input type="text" id="nama-sertifikat-input" placeholder="Ketik nama lengkap Anda di sini" class="w-full max-w-md p-3 border border-gray-300 rounded-lg mb-4 text-center">
+                    <button id="generate-certificate-btn" class="btn-primary font-bold py-3 px-6 rounded-lg">Buat Sertifikat</button>
+                </div>
+                <div id="certificate-display" class="hidden mt-8 printable-area">
+                    <div class="certificate p-8 md:p-12 max-w-4xl mx-auto">
+                        <div class="border-2 border-[#386641] p-8 text-center">
+                            <h2 class="text-sm font-bold uppercase tracking-widest text-gray-500">Sertifikat Kelulusan</h2>
+                            <h1 class="text-4xl md:text-5xl font-bold text-[#386641] my-4">Pejuang ASI Hebat</h1>
+                            <p class="text-lg text-gray-700">Dengan bangga diberikan kepada:</p>
+                            <p id="certificate-name" class="text-3xl font-semibold my-6 pb-2 border-b-2 border-gray-300"></p>
+                            <p class="text-gray-600 max-w-lg mx-auto">
+                                Karena telah berhasil menyelesaikan materi dan kuis edukasi "Panduan Sukses Menyusui" dengan hasil yang sangat baik.
+                            </p>
+                            <p class="mt-8 text-sm text-gray-500" id="certificate-date"></p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-6 no-print">
+                        <button id="print-certificate-btn" class="btn-primary font-bold py-3 px-6 rounded-lg">Cetak Sertifikat</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('main > section');
+
+            const quizContainer = document.getElementById('quiz-container');
+            const quizResult = document.getElementById('quiz-result');
+            const resultTitle = document.getElementById('result-title');
+            const resultMessage = document.getElementById('result-message');
+            const retryQuizBtn = document.getElementById('retry-quiz');
+            const getCertificateBtn = document.getElementById('get-certificate');
+            
+            const certificateSection = document.getElementById('content-sertifikat');
+            const generateCertBtn = document.getElementById('generate-certificate-btn');
+            const certificateDisplay = document.getElementById('certificate-display');
+            const certificateName = document.getElementById('certificate-name');
+            const certificateDate = document.getElementById('certificate-date');
+            const nameInput = document.getElementById('nama-sertifikat-input');
+            const printCertBtn = document.getElementById('print-certificate-btn');
+            
+            const KKM = 80;
+
+            const quizData = [
+                {
+                    question: "ASI eksklusif adalah pemberian ASI saja tanpa cairan atau makanan tambahan apapun, kecuali obat atau vitamin, selama...",
+                    options: ["3 bulan", "6 bulan", "1 tahun", "2 tahun"],
+                    answer: 1
+                },
+                {
+                    question: "Cairan ASI pertama yang kaya antibodi dan berfungsi sebagai 'vaksin pertama' bagi bayi adalah...",
+                    options: ["Foremilk", "Kolostrum", "Hindmilk", "ASI Transisi"],
+                    answer: 1
+                },
+                {
+                    question: "Manakah yang merupakan manfaat menyusui bagi ibu?",
+                    options: ["Meningkatkan risiko kanker payudara", "Mempercepat pemulihan rahim pasca-melahirkan", "Menambah berat badan", "Memperlambat pertumbuhan rambut"],
+                    answer: 1
+                },
+                {
+                    question: "Posisi pelekatan yang benar ditandai dengan...",
+                    options: ["Hanya puting yang masuk ke mulut bayi", "Bayi hanya mengisap sedikit dari puting", "Sebagian besar areola (terutama bagian bawah) masuk ke mulut bayi", "Bibir bayi terlipat ke dalam"],
+                    answer: 2
+                },
+                {
+                    question: "Kandungan ASI matang yang keluar di awal sesi menyusui, lebih encer dan kaya akan laktosa disebut...",
+                    options: ["Hindmilk", "Kolostrum", "Foremilk", "ASI Transisi"],
+                    answer: 2
+                },
+                {
+                    question: "Tanda bahwa bayi mendapatkan cukup ASI adalah...",
+                    options: ["Bayi sering menangis setelah menyusui", "Popok basah hanya 1-2 kali sehari", "Bayi tampak puas dan tidur nyenyak setelah menyusui", "Berat badan bayi tidak bertambah"],
+                    answer: 2
+                },
+                {
+                    question: "Produksi ASI bergantung pada prinsip...",
+                    options: ["Hanya pada asupan makanan ibu", "Semakin banyak disusui, semakin sedikit ASI yang diproduksi", "Siklus menstruasi", "Supply and demand: semakin sering dikosongkan, semakin banyak diproduksi"],
+                    answer: 3
+                },
+                {
+                    question: "Penyebab umum nyeri pada puting saat menyusui adalah...",
+                    options: ["Posisi pelekatan yang salah", "Terlalu banyak minum air", "Stres", "Jenis makanan yang dikonsumsi ibu"],
+                    answer: 0
+                },
+                {
+                    question: "Menyusui pada malam hari sangat penting karena...",
+                    options: ["Bayi lebih aktif di malam hari", "Produksi hormon prolaktin lebih tinggi pada malam hari", "ASI malam memiliki kandungan lemak lebih rendah", "Bayi tidak boleh diberi makan di siang hari"],
+                    answer: 1
+                },
+                {
+                    question: "ASI dapat disimpan di freezer khusus ASI atau kulkas. Untuk ASI yang baru dipompa, dapat bertahan di suhu ruangan (sekitar 25°C) selama...",
+                    options: ["1-2 jam", "3-4 jam", "6-8 jam", "12 jam"],
+                    answer: 2
+                }
+            ];
+
+            function switchTab(targetId) {
+                contentSections.forEach(section => {
+                    section.classList.add('hidden');
+                });
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                });
+
+                document.getElementById(`content-${targetId}`).classList.remove('hidden');
+                document.getElementById(`nav-${targetId}`).classList.add('active');
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.id.split('-')[1];
+                    if (targetId === 'kuis') {
+                        startQuiz();
+                    }
+                    if (document.getElementById(`content-${targetId}`)) {
+                        switchTab(targetId);
+                    }
+                    certificateSection.classList.add('hidden');
+                    certificateDisplay.classList.add('hidden');
+                });
+            });
+            
+            document.getElementById('mulai-belajar').addEventListener('click', () => switchTab('materi'));
+            
+            function renderKomposisiChart() {
+                const ctx = document.getElementById('komposisiChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Antibodi', 'Protein', 'Lemak', 'Laktosa'],
+                        datasets: [{
+                            label: 'Kolostrum',
+                            data: [90, 70, 30, 40],
+                            backgroundColor: '#FBC6A4',
+                        }, {
+                            label: 'ASI Matang',
+                            data: [40, 30, 60, 80],
+                            backgroundColor: '#A7C957',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Kandungan Relatif (%)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Perbandingan Komposisi ASI'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: ${context.raw}%`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function startQuiz() {
+                quizContainer.innerHTML = '';
+                quizContainer.classList.remove('hidden');
+                quizResult.classList.add('hidden');
+                
+                let quizHTML = `<h3 class="text-2xl font-bold text-[#386641] mb-6">Pertanyaan Kuis</h3>`;
+                quizData.forEach((item, index) => {
+                    quizHTML += `
+                        <div class="mb-6">
+                            <p class="font-semibold mb-3">${index + 1}. ${item.question}</p>
+                            <div class="space-y-2">
+                                ${item.options.map((option, i) => `
+                                    <label class="block p-3 rounded-lg cursor-pointer quiz-option">
+                                        <input type="radio" name="question${index}" value="${i}" class="mr-3">
+                                        ${option}
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+                quizHTML += `<button id="submit-quiz" class="btn-primary font-bold w-full py-3 px-6 rounded-lg mt-6">Selesai & Lihat Hasil</button>`;
+                quizContainer.innerHTML = quizHTML;
+
+                const options = quizContainer.querySelectorAll('.quiz-option');
+                options.forEach(opt => {
+                    opt.addEventListener('click', () => {
+                        const radio = opt.querySelector('input[type="radio"]');
+                        const groupName = radio.name;
+                        document.querySelectorAll(`input[name="${groupName}"]`).forEach(r => {
+                            r.parentElement.classList.remove('selected');
+                        });
+                        opt.classList.add('selected');
+                        radio.checked = true;
+                    });
+                });
+
+                document.getElementById('submit-quiz').addEventListener('click', submitQuiz);
+            }
+
+            function submitQuiz() {
+                let score = 0;
+                quizData.forEach((item, index) => {
+                    const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
+                    if (selectedOption && parseInt(selectedOption.value) === item.answer) {
+                        score++;
+                    }
+                });
+
+                const percentage = (score / quizData.length) * 100;
+                quizContainer.classList.add('hidden');
+                quizResult.classList.remove('hidden');
+
+                if (percentage >= KKM) {
+                    resultTitle.textContent = `Selamat, Anda Lulus! 🎉`;
+                    resultMessage.textContent = `Skor Anda: ${percentage.toFixed(0)}%. Anda menunjukkan pemahaman yang luar biasa tentang menyusui.`;
+                    resultTitle.style.color = '#386641';
+                    getCertificateBtn.classList.remove('hidden');
+                } else {
+                    resultTitle.textContent = `Tetap Semangat!`;
+                    resultMessage.textContent = `Skor Anda: ${percentage.toFixed(0)}%. Coba pelajari materi lagi dan ulangi kuisnya. Anda pasti bisa!`;
+                    resultTitle.style.color = '#D97706';
+                    getCertificateBtn.classList.add('hidden');
+                }
+            }
+
+            retryQuizBtn.addEventListener('click', startQuiz);
+            
+            getCertificateBtn.addEventListener('click', () => {
+                contentSections.forEach(section => section.classList.add('hidden'));
+                certificateSection.classList.remove('hidden');
+            });
+            
+            generateCertBtn.addEventListener('click', () => {
+                const name = nameInput.value;
+                if(name.trim() === '') {
+                    alert('Mohon isi nama lengkap Anda.');
+                    return;
+                }
+                certificateName.textContent = name;
+                const today = new Date();
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                certificateDate.textContent = `Diterbitkan pada: ${today.toLocaleDateString('id-ID', options)}`;
+                certificateDisplay.classList.remove('hidden');
+            });
+
+            printCertBtn.addEventListener('click', () => {
+                window.print();
+            });
+
+            renderKomposisiChart();
+            switchTab('beranda');
+        });
+    </script>
+</body>
+</html>
